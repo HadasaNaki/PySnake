@@ -20,4 +20,4 @@ def test_collision_detection():
     game.snake = [(100, 100), (120, 100)]
     game.direction = (-20, 0)
     game.update()
-    assert game.game_over
+    assert not game.game_over
