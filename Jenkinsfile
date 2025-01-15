@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'snake-game'
+        DOCKER_IMAGE = 'hadasanaki/snake-game:test'
         DOCKER_TAG = 'latest'
     }
 
@@ -13,30 +13,27 @@ pipeline {
             }
         }
 
-        stage('Setup Python') {
+        stage('Build Docker Image') {
             steps {
-                sh '''
-                    python -m venv venv
-                    . venv/bin/activate
-                    pip install -r requirements.txt
-                '''
+                script {
+                    docker.build("${DOCKER_IMAGE}")
+                }
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    def myContainer = docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").run('-d -p 8080:8000')
+                }
             }
         }
 
         stage('Run Tests') {
             steps {
                 sh '''
-                    . venv/bin/activate
-                    pytest
+                    python -m pytest
                 '''
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
-                }
             }
         }
 
